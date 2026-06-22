@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "glivers/rackage",
-            "version": "v2.0.4",
+            "version": "v2.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/glivers/rackage.git",
-                "reference": "8eed226235856547863a0c2c5c4e2d712ad6f505"
+                "reference": "86e5c89f3176c4d54f0ed4f3f4656400995541e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/glivers/rackage/zipball/8eed226235856547863a0c2c5c4e2d712ad6f505",
-                "reference": "8eed226235856547863a0c2c5c4e2d712ad6f505",
+                "url": "https://api.github.com/repos/glivers/rackage/zipball/86e5c89f3176c4d54f0ed4f3f4656400995541e7",
+                "reference": "86e5c89f3176c4d54f0ed4f3f4656400995541e7",
                 "shasum": ""
             },
             "require": {
@@ -42,9 +42,9 @@
             "description": "This is a collection of all the PHP classes that make Rachie a real MVC framework",
             "support": {
                 "issues": "https://github.com/glivers/rackage/issues",
-                "source": "https://github.com/glivers/rackage/tree/v2.0.4"
+                "source": "https://github.com/glivers/rackage/tree/v2.0.8"
             },
-            "time": "2026-02-04T13:45:58+00:00"
+            "time": "2026-06-22T17:57:31+00:00"
         },
         {
             "name": "glivers/roline",

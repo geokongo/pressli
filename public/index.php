@@ -79,7 +79,8 @@ try {
 	// This initializes the framework and starts request handling
 	require_once $bootstrap;
 
-} catch (Exception $e) {
+} 
+catch (Exception $e) {
 	
 	// ===========================================================================
 	// BOOTSTRAP ERROR HANDLING
@@ -93,7 +94,8 @@ try {
 		echo "ERROR: " . $e->getMessage() . "\n";
 		exit(1);
 		
-	} else {
+	} 
+	else {
 		
 		// Web request - display formatted error page
 		$error = $e->getMessage();
@@ -103,25 +105,26 @@ try {
 		
 		if (file_exists($errorPage)) {
 			include $errorPage;
-		} else {
+		} 
+		else {
 			// Fallback if error page is also missing
 			echo "<!DOCTYPE html>
-<html>
-<head>
-	<title>Application Error</title>
-	<style>
-		body { font-family: Arial, sans-serif; margin: 40px; }
-		.error { background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px; }
-	</style>
-</head>
-<body>
-	<div class='error'>
-		<h1>Application Error</h1>
-		<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
-		<p>Please contact the system administrator.</p>
-	</div>
-</body>
-</html>";
+				<html>
+				<head>
+					<title>Application Error</title>
+					<style>
+						body { font-family: Arial, sans-serif; margin: 40px; }
+						.error { background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px; }
+					</style>
+				</head>
+				<body>
+					<div class='error'>
+						<h1>Application Error</h1>
+						<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+						<p>Please contact the system administrator.</p>
+					</div>
+				</body>
+				</html>";
 		}
 		
 		exit(1);
