@@ -1,10 +1,7 @@
-config/database.php
-config/settings.php
+config/
 vault/
 
 # Themes - only track Aurora (default theme)
-themes/*
-!themes/aurora/
 public/themes/*
 !public/themes/aurora/
 

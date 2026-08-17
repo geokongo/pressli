@@ -45,11 +45,12 @@ require __DIR__ . '/public/index.php';
  *
  * Check if the glivers/roline package is available via Composer.
  */
-if (!class_exists('Roline\Roline'))
-{
+if (!class_exists('Roline\Roline')) {
+    
     echo "\033[31m✗ Error: Roline package not installed.\033[0m\n";
     echo "\033[33m→ Run: composer require glivers/roline\033[0m\n";
-    exit(1);
+
+    exit();
 }
 
 /**

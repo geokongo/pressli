@@ -86,7 +86,7 @@ a:hover {
     display: block;
 }
 
-.site-navigation ul {
+.site-navigation > ul {
     list-style: none;
     display: flex;
     gap: 2rem;
@@ -98,6 +98,49 @@ a:hover {
 }
 
 .site-navigation a:hover {
+    color: var(--secondary-color);
+}
+
+/* Dropdown Menu */
+.site-navigation li {
+    position: relative;
+}
+
+.site-navigation li ul {
+    list-style: none;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    padding: 0.5rem 0;
+    margin: 0;
+    z-index: 1000;
+}
+
+.site-navigation li:hover > ul {
+    display: block;
+}
+
+.site-navigation li ul li {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.site-navigation li ul a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.site-navigation li ul a:hover {
+    background: var(--bg-secondary);
     color: var(--secondary-color);
 }
 
@@ -367,239 +410,3 @@ a:hover {
         font-size: 1rem;
     }
 }
-
-/*
- * Aurora Theme - Additional Footer Styles
- * These are the enhanced footer styles added to improve the footer design
- */
-
-/* ========================================
-   Enhanced Footer Styles
-   ======================================== */
-
-.site-footer {
-    background: var(--primary-color);
-    color: white;
-    margin-top: 4rem;
-    padding: 3rem 0 0;
-}
-
-.footer-widgets {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 var(--spacing) 3rem;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-}
-
-.footer-widget h3 {
-    font-size: 1.125rem;
-    margin-bottom: 1.5rem;
-    color: white;
-}
-
-.footer-widget ul {
-    list-style: none;
-}
-
-.footer-widget li {
-    margin-bottom: 0.75rem;
-}
-
-.footer-widget a {
-    color: rgba(255, 255, 255, 0.8);
-    transition: color 0.3s ease;
-}
-
-.footer-widget a:hover {
-    color: white;
-}
-
-.footer-widget p {
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-/* Newsletter Form */
-.newsletter-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.newsletter-form input {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-}
-
-.newsletter-form button {
-    padding: 0.75rem 1.5rem;
-    background: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.newsletter-form button:hover {
-    background: #2980b9;
-}
-
-/* Social Icons */
-.social-links {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.social-links a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    color: white;
-    transition: background 0.3s ease;
-}
-
-.social-links a:hover {
-    background: var(--secondary-color);
-}
-
-/* Footer Bottom */
-.footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem 0;
-}
-
-.footer-bottom-container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 var(--spacing);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.footer-info {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.875rem;
-}
-
-.footer-menu {
-    list-style: none;
-    display: flex;
-    gap: 2rem;
-}
-
-.footer-menu a {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.875rem;
-}
-
-.footer-menu a:hover {
-    color: white;
-}
-
-/* ========================================
-   Related Posts Styles
-   ======================================== */
-
-.related-posts {
-    margin-top: 4rem;
-    padding-top: 3rem;
-    border-top: 2px solid var(--border-color);
-}
-
-.related-posts-title {
-    font-size: 1.75rem;
-    margin-bottom: 2rem;
-    color: var(--primary-color);
-}
-
-.related-posts-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-}
-
-.related-post-card {
-    transition: transform 0.3s ease;
-}
-
-.related-post-card:hover {
-    transform: translateY(-5px);
-}
-
-.related-post-thumbnail {
-    display: block;
-    overflow: hidden;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-
-.related-post-thumbnail img {
-    width: 100%;
-    height: auto;
-    transition: transform 0.3s ease;
-}
-
-.related-post-card:hover .related-post-thumbnail img {
-    transform: scale(1.05);
-}
-
-.related-post-content .post-meta {
-    margin-bottom: 0.5rem;
-}
-
-.related-post-title {
-    font-size: 1rem;
-    line-height: 1.4;
-    margin: 0;
-}
-
-.related-post-title a {
-    color: var(--primary-color);
-}
-
-.related-post-title a:hover {
-    color: var(--secondary-color);
-}
-
-/* ========================================
-   Responsive Styles
-   ======================================== */
-
-@media (max-width: 768px) {
-    /* Footer Responsive */
-    .footer-widgets {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .footer-bottom-container {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-
-    .newsletter-form {
-        flex-direction: column;
-    }
-
-    /* Related Posts Responsive */
-    .related-posts-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
-

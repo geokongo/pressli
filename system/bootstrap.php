@@ -71,10 +71,10 @@ try {
 
 	// Define development environment constant
 	// This affects error display and debugging features
-	if (isset($settings) && $settings['dev'] == true) {
-		define('DEV', true);
+	if (isset($settings) && $settings['debug'] == true) {
+		define('DEBUG', true);
 	} 
-	else define('DEV', false);
+	else define('DEBUG', false);
 
 	// ===========================================================================
 	// ERROR HANDLING SETUP
@@ -89,6 +89,13 @@ try {
 	// -----------------------------------------------------------------------
 	// These files contain essential application settings.
 	// The application cannot run without them.
+	
+	// Security configuration settings
+	if (!file_exists(__DIR__ . '/../config/security.php')) {
+		throw new Exception(
+			"Security configuration missing: config/security.php. Please restore if deleted."
+		);
+	}	
 	
 	// Database connection settings
 	if (!file_exists(__DIR__ . '/../config/database.php')) {
@@ -132,6 +139,10 @@ try {
 	// ===========================================================================
 	// CONFIGURATION LOADING - Load all config files
 	// ===========================================================================
+	
+	// Load security configuration
+	// Helps to set the correct headers to secure the application
+	$security = require_once __DIR__ . '/../config/security.php';
 
 	// Load session settings
 	// These help sync browser sessions configurations and browser cookies
@@ -141,14 +152,12 @@ try {
 	$database = require_once __DIR__ . '/../config/database.php';
 
 	// Load optional configuration files
-	// These are not required but enable additional features
-	
-	// Cache configuration (optional)
+	// Cache configuration
 	$cache = array();
 	if (file_exists(__DIR__ . '/../config/cache.php')) {
 		$cache = require_once __DIR__ . '/../config/cache.php';
 	} 
-	elseif (DEV) {
+	else if (DEBUG) {
 		// Warn in development if cache config is missing
 		trigger_error(
 			'Cache configuration not found. Create config/cache.php to enable caching features.',
@@ -156,12 +165,12 @@ try {
 		);
 	}
 
-	// Mail configuration (optional)
+	// Mail configuration
 	$mail = array();
 	if (file_exists(__DIR__ . '/../config/mail.php')) {
 		$mail = require_once __DIR__ . '/../config/mail.php';
 	} 
-	elseif (DEV) {
+	else if (DEBUG) {
 		// Warn in development if mail config is missing
 		trigger_error(
 			'Mail configuration not found. Create config/mail.php to enable email features.',
@@ -223,10 +232,11 @@ try {
 
 	// Load all configurations into Registry using method chaining
 	// Registry provides centralized access to config and resources
-	Rackage\Registry::setSettings($settings)
-	                ->setDatabase($database)
-	                ->setCache($cache)
-	                ->setMail($mail)
+	Rackage\Registry::settings($settings)
+					->securityConfig($security)
+	                ->dbConfig($database)
+	                ->cacheConfig($cache)
+	                ->mailConfig($mail)
 	                ->setUrl($_GET['_rachie_route'] ?? '');
 
 	// Store application start time for performance profiling

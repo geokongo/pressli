@@ -341,7 +341,7 @@ class PluginsController extends AdminController
         $settings = $this->settings;
         $viewPaths = $settings['view_paths'] ?? [];
         $settings['view_paths'] = array_merge(['plugins/' . $namespace . '/templates'], $viewPaths);
-        Registry::setSettings($settings);
+        Registry::settings($settings);
 
         $plugin = new $class();
         $content = $plugin->admin('get', $param1, $param2, $param3);
@@ -380,7 +380,7 @@ class PluginsController extends AdminController
         $settings = $this->settings;
         $viewPaths = $settings['view_paths'] ?? [];
         $settings['view_paths'] = array_merge(['plugins/' . $namespace . '/templates'], $viewPaths);
-        Registry::setSettings($settings);
+        Registry::settings($settings);
 
         $plugin = new $class();
         $plugin->admin('post', $param1, $param2, $param3);

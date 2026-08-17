@@ -32,7 +32,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ Url::link('admin/posts/new') }}">
+            <form class="post-create" method="POST" action="{{ Url::link('admin/posts/new') }}">
                 {{{ Csrf::field() }}}
                 <input type="hidden" name="type" value="post">
 
@@ -54,8 +54,10 @@
 
                     <!-- Content Editor -->
                     <div class="editor-content-wrapper">
-                        <div id="editor-container" style="min-height: 400px;"></div>
+                        <!-- <div id="editor-container" style="min-height: 400px;"></div> -->
+                        <div class="text-editor-div"></div>
                         <textarea name="content" id="content-input" style="display: none;"></textarea>
+
                     </div>
 
                     <!-- Excerpt -->
@@ -199,6 +201,16 @@
         <script src="{{ Url::assets('admin/js/quill.min.js') }}"></script>
         <script src="{{ Url::assets('admin/js/media.js') }}"></script>
         <script src="{{ Url::assets('admin/js/media-picker.js') }}"></script>
+
+        <script>
+            // Initialize text editor functionality once document is ready
+            document.addEventListener('DOMContentLoaded', () => {
+                new TextEditor({
+                    uploadUrl: "http://localhost/pressli/admin/media/upload",
+                    CSRF: CSRF
+                });
+            });
+        </script>
         <script>
         // Show/hide scheduled date field based on status
         document.getElementById('status').addEventListener('change', function() {
@@ -215,25 +227,25 @@
         });
 
         // Initialize Quill editor
-        var quill = new Quill('#editor-container', {
-            theme: 'snow',
-            placeholder: 'Start writing your post...',
-            modules: {
-                toolbar: {
-                    container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['link', 'image'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: imageHandler
-                    }
-                }
-            }
-        });
+        // var quill = new Quill('#editor-container', {
+        //     theme: 'snow',
+        //     placeholder: 'Start writing your post...',
+        //     modules: {
+        //         toolbar: {
+        //             container: [
+        //                 [{ 'header': [1, 2, 3, false] }],
+        //                 ['bold', 'italic', 'underline', 'strike'],
+        //                 ['link', 'image'],
+        //                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        //                 [{ 'align': [] }],
+        //                 ['clean']
+        //             ],
+        //             handlers: {
+        //                 image: imageHandler
+        //             }
+        //         }
+        //     }
+        // });
 
         // Custom image handler - opens Pressli media picker
         function imageHandler() {
@@ -288,9 +300,10 @@
         });
 
         // Sync Quill content to hidden textarea on form submit
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function() {
-            const html = quill.root.innerHTML;
+        const form = document.querySelector('form.post-create');
+        form.addEventListener('submit', function(event) {
+            // const html = quill.root.innerHTML;
+            const html = document.querySelector('.text-editor-div').innerHTML;
             document.getElementById('content-input').value = html;
         });
 

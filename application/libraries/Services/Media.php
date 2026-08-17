@@ -34,7 +34,7 @@
  * - Physical file remains on disk after soft delete (recovery possible)
  *
  * ERROR HANDLING:
- * All methods throw ServiceException on validation or business logic errors.
+ * All methods throw ServiceException on validation or logic errors.
  * Controllers catch exceptions and format response appropriately (flash messages or JSON).
  *
  * @author Geoffrey Okongo <code@rachie.dev>
