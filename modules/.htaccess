@@ -1,0 +1,13 @@
+# Rachie Framework - Module Assets
+# Serves module assets directly. Routing is handled by /public/.htaccess.
+# Extensionless files and unknown extensions are allowed by design.
+
+# Block executable files
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pht|phar|pl|py|jsp|asp|sh|cgi)$">
+    Require all denied
+</FilesMatch>
+
+# Block sensitive config and system files
+<FilesMatch "\.(htaccess|htpasswd|ini|conf|config|log|sql|bak)$">
+    Require all denied
+</FilesMatch>
