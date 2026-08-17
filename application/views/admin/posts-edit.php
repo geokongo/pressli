@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ Url::link('admin/posts/edit/' . $post['id']) }}">
+            <form class="post-update" method="POST" action="{{ Url::link('admin/posts/edit/' . $post['id']) }}">
                 {{{ Csrf::field() }}}
                 <input type="hidden" name="type" value="post">
 
@@ -70,7 +70,8 @@
 
                     <!-- Content Editor -->
                     <div class="editor-content-wrapper">
-                        <div id="editor-container" style="min-height: 400px;"></div>
+                        <!-- <div id="editor-container" style="min-height: 400px;"></div> -->
+                        <div class="text-editor-div">{{{ $post['content'] or '' }}}</div>
                         <textarea name="content" id="content-input" style="display: none;">{{ $post['content'] or '' }}</textarea>
                     </div>
 
@@ -406,14 +407,15 @@
         attachFeaturedImageHandlers();
 
         // Ajax form submission with button loading state
-        const form = document.querySelector('form');
+        const form = document.querySelector('form.post-update');
         const submitButtons = form.querySelectorAll('button[type="submit"]');
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
             // Sync Quill content to hidden textarea
-            const html = quill.root.innerHTML;
+            // const html = quill.root.innerHTML;
+            const html = document.querySelector('.text-editor-div').innerHTML;
             document.getElementById('content-input').value = html;
 
             // Disable buttons and show loading state

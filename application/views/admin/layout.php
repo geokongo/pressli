@@ -10,6 +10,7 @@
     @endisset
     <script>
         window.BASE = "{{ Url::base() }}";
+        window.CSRF = "{{ Csrf::token() }}";
     </script>
     @section('styles')
     	<link rel="stylesheet" href="{{Url::assets('admin/css/admin.css')}}">
@@ -41,7 +42,11 @@
 
 <!-- JS Scripts -->
 @section('scripts')
-	<script src="{{Url::assets('admin/js/admin.js')}}"></script>
+    <script src="{{Url::assets('admin/js/admin.js')}}"></script>
+	<script src="{{Url::assets('admin/js/editor.js')}}"></script>
 @endsection
 </body>
 </html>
+
+
+<!-- Now that your filename engine is completely optimized, let me know if you would like to design a visual upload progress spinner to show over the image node while the FormData stream travels to your server -->

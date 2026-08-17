@@ -146,7 +146,7 @@ class PageController extends Controller
         // Prepends (not replaces) to preserve plugin/module view paths from config.
         $existingViewPaths = $settings['view_paths'] ?? [];
         $settings['view_paths'] = array_merge(['themes/' . $activeTheme], $existingViewPaths);
-        Registry::setSettings($settings);
+        Registry::settings($settings);
 
         // STEP 4: Load custom CSS from file (NULL if user hasn't customized yet)
         $cssPath = Path::vault() . 'tmp' . DIRECTORY_SEPARATOR . 'theme-custom.css';

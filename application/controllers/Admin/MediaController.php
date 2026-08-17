@@ -1,6 +1,8 @@
 <?php namespace Controllers\Admin;
 
+use Rackage\Url;
 use Rackage\Csrf;
+use Rackage\Path;
 use Rackage\View;
 use Rackage\Input;
 use Rackage\Session;
@@ -70,22 +72,31 @@ class MediaController extends AdminController
     {
         // Verify CSRF token
         if (!Csrf::verify()) {
-            View::json(['success' => false, 'message' => 'Invalid CSRF token'], 403);
-            return;
+            View::halt(['success' => false, 'message' => 'Invalid CSRF token'], 403);
         }
 
         try {
+
             // Upload file via service
-            $media = Media::upload('file', Session::get('user_id'));
+            $uploaded = Media::upload('file', Session::get('user_id'));
 
-            // Array of data to send to view
-            $data = [];
+            if($uploaded) {
 
-            // Return media data for grid insertion
-            View::json([
-                'success' => true,
-                'media' => $media
-            ]);
+                View::json([
+                    'success'  => true,
+                    'image_url'=> Url::assets($uploaded['file_path']),
+                    'filename' => $uploaded['filename']   
+                ]);
+            }
+
+            else {
+
+                // Return with false message
+                View::json([
+                    'success' => false,
+                    'media' => 'There was an error uploading the file'
+                ]);
+            }
         }
         catch (ServiceException $e) {
             // Upload failed or validation error

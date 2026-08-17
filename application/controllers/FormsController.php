@@ -53,11 +53,13 @@
  * @version 0.0.1
  */
 
-use Rackage\Controller;
+use Rackage\Log;
 use Rackage\View;
-use Rackage\Input;
 use Rackage\Mail;
 use Rackage\Csrf;
+use Rackage\Input;
+use Rackage\Registry;
+use Rackage\Controller;
 
 class FormsController extends Controller
 {
@@ -111,29 +113,73 @@ class FormsController extends Controller
             return View::json(['error' => 'Invalid request'], 403);
         }
 
-        // STEP 2: Get all form data
-        $data = Input::post();
+        // STEP 2: Get and validate all form data
+        $name       = trim(Input::post('name'));
+        $email      = trim(Input::post('email'));
+        $subject    = trim(Input::post('subject'));
+        $message    = trim(Input::post('message'));
+        $company    = trim(Input::post('company'));
+        $website    = trim(Input::post('website'));
+        $formType   = trim(Input::post('form_type'));
 
-        // STEP 3: Build plain text email body
-        $body = "New form submission:\n\n";
-        foreach ($data as $key => $value) {
-            // Skip CSRF token in email
-            if ($key !== 'csrf_token') {
-                $body .= ucfirst($key) . ": " . $value . "\n";
-            }
+        if(!isset($name, $email, $message, $company, $website)) {
+            View::halt(['success' => false, 'message' => 'Please provide all form fields']);
         }
 
-        // STEP 4: Send email using Mail class
-        // TODO: Make recipient configurable per form type
-        $sent = Mail::to('admin@yourdomain.com')
-            ->subject('New Form Submission')
-            ->body($body)
-            ->send();
+        if($formType == 'contact') {
 
-        // STEP 5: Return JSON response
-        if ($sent) {
-            View::json(['success' => true, 'message' => 'Form submitted successfully']);
-        } else {
+            // STEP 3: Build and send plain text email
+
+            if(!$subject) View::halt(['success' => false, 'message' => 'Please provide an email subject']);
+
+            $message    = array_map(fn($line) => "<p>{$line}</p>", explode("\n", $message));
+            $message    = join("\n", $message); 
+            $message   .= "<p>Regards, <br>{$name} <b> {$company} {$website}";
+
+            // Load email settings to access configuration
+            $settings   = Registry::mail();
+
+            $sent   = Mail::to($settings['from_email'])
+                        ->replyTo($email)
+                        ->subject($subject)
+                        ->body($message)
+                        ->send();
+        }
+        else if($formType == 'audit') {
+
+            $stage      = trim(Input::post('stage'));
+            $challenge  = trim(Input::post('challenge'));
+            $role       = trim(Input::post('role'));
+            $qualified  = trim(Input::post('budget_qualified'));
+            $competitors= trim(Input::post('competitors'));
+            
+            // STEP 3: Build and send plain text email
+            $message     = "<p>Hi David, </p><p> I'd like a SaaS SEO audit of {$company}.</p>";
+            $message    .= "<p>What Stage Is Your SaaS? <br> -{$stage}.</p>";
+            $message    .= "<p>What's Your Biggest Customer Acquisition Challenge Right Now?";
+            $message    .= join("\n", array_map(fn($line) => "<br>-$line</br>", array_filter(explode("\n", $challenge))));
+            $message    .= "</p>";
+            $message    .= "<p>Who Are Your Top 3 Competitors?";
+            $message    .= join("\n", array_map(fn($line) => "<br>-$line</br>", array_filter(explode(" ", $competitors))));
+            $message    .= "</p>";
+            $message    .= "<p>Budget Qualified? <br> $qualified </p>";
+            $message    .= "<p>Regards, <br>{$name}, {$role} {$company} {$website}";
+
+            // Load email settings to access configuration
+            $settings   = Registry::mail();
+
+            $sent   = Mail::to($settings['from_email'])
+                        ->replyTo($email)
+                        ->subject("SaaS SEO Audit Request for $company")
+                        ->body($message)
+                        ->send();            
+        }
+
+        // STEP 4: Return JSON response
+        if ($sent) View::json(['success' => true, 'message' => 'Form submitted successfully']);
+        else {
+
+            Log::info("Mail Send Failed", Input::post());
             View::json(['error' => 'Failed to send email. Please try again later.'], 500);
         }
     }
