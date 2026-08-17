@@ -70,7 +70,7 @@ return array(
 	 *   'Company Name'
 	 *   'Support Team'
 	 */
-	'from_name' => 'Rachie Application',
+	'from_name' => 'Pressli CMS',
 
 	/**
 	 * Reply-To Email Address
@@ -193,7 +193,7 @@ return array(
 		 * 
 		 * IMPORTANT: Add mail.php to .gitignore!
 		 */
-		'password' => 'your-password-here',
+		'password' => '',
 
 		/**
 		 * SMTP Timeout (seconds)
