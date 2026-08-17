@@ -254,7 +254,7 @@ abstract class RackageTest extends TestCase
         $originalSettings = Registry::settings();
         if (!empty($settingsOverride)) {
             $mergedSettings = array_merge($originalSettings, $settingsOverride);
-            Registry::setSettings($mergedSettings);
+            Registry::settings($mergedSettings);
         }
 
         // Initialize Input (what system/start.php does)
@@ -279,7 +279,7 @@ abstract class RackageTest extends TestCase
 
         // Restore original settings
         if (!empty($settingsOverride)) {
-            Registry::setSettings($originalSettings);
+            Registry::settings($originalSettings);
         }
 
         return $response;
