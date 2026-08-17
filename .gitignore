@@ -3,8 +3,6 @@ config/settings.php
 vault/
 
 # Themes - only track Aurora (default theme)
-themes/*
-!themes/aurora/
 public/themes/*
 !public/themes/aurora/
 
