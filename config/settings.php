@@ -106,7 +106,7 @@ return array(
 	 * admin user existence in database to prevent reinstallation attacks.
 	 * Even if this is set to false, installation cannot proceed if admin exists.
 	 */
-	'installed' => true,
+	'installed' => false,
 
 	// ============================================================================
 	// ENVIRONMENT CONFIGURATION
@@ -130,7 +130,7 @@ return array(
 	 * 
 	 * IMPORTANT: Always set to FALSE in production environments!
 	 */
-	'debug' => true,
+	'debug' => false,
 
 	/**
 	 * Error Log File Path
@@ -517,6 +517,14 @@ return array(
 		 * Default: 'show'
 		 */
 		'method' => 'show',
+
+		/**
+		 * Routing Mode
+		 * 
+		 * Decides whether routing should stick to named routes
+		 * or to also include direct controller->method pair mapping
+		 */
+		'strict' => false,
 	),
 
 	// ============================================================================
