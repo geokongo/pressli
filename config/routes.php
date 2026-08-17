@@ -43,10 +43,10 @@ return array(
 	// AUTHENTICATION ROUTES
 	// ===========================================================================
 
-	'login' => 'auth@login',
-	'logout' => 'auth@logout',
-	'forgot-password' => 'auth@forgot',
-	'reset-password' => 'auth@reset',
+	'login' 			=> 'auth@login',
+	'logout' 			=> 'auth@logout',
+	'forgot-password' 	=> 'auth@forgot',
+	'reset-password' 	=> 'auth@reset',
 
 	// ===========================================================================
 	// INSTALLATION ROUTES (Auto-mapped, no route definition needed)
