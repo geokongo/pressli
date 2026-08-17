@@ -10,7 +10,7 @@ Here's what you get:
 - Service layer architecture that keeps your business logic clean
 
 **Version:** 1.0.0
-**Website:** https://pressli.co.ke
+**Website:** https://pressli.org
 **License:** MIT
 
 ---
