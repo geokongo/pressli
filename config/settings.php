@@ -106,7 +106,7 @@ return array(
 	 * admin user existence in database to prevent reinstallation attacks.
 	 * Even if this is set to false, installation cannot proceed if admin exists.
 	 */
-	'installed' => false,
+	'installed' => true,
 
 	// ============================================================================
 	// ENVIRONMENT CONFIGURATION
@@ -130,7 +130,7 @@ return array(
 	 * 
 	 * IMPORTANT: Always set to FALSE in production environments!
 	 */
-	'dev' => true,
+	'debug' => true,
 
 	/**
 	 * Error Log File Path
@@ -452,8 +452,8 @@ return array(
 	 * Default: Empty (only use application/views/)
 	 */
 	'view_paths' => array(
-		'plugins/',
-		'themes/',
+		'public/plugins/',
+		'public/themes/',
 	),
 
 	// ============================================================================
@@ -491,14 +491,14 @@ return array(
 	 * IMPORTANT: Most MVC applications don't need this. Only enable for
 	 * content-focused platforms with dynamic URLs.
 	 */
-	'routing' => array(
+	'catch_all' => array(
 		/**
 		 * Enable Catch-All Routing
 		 *
 		 * Set to true to enable catch-all routing for unmatched URLs.
 		 * Default: false (disabled)
 		 */
-		'catch_all' => true,
+		'enabled' => true,
 
 		/**
 		 * Catch-All Controller
