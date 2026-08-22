@@ -1,6 +1,3 @@
-config/
-vault/
-
 # Themes - only track Aurora (default theme)
 public/themes/*
 !public/themes/aurora/
