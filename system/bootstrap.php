@@ -32,7 +32,7 @@
 // SYSTEM BOOTSTRAP - Load required files before proceeding
 // ===========================================================================
 
-try {
+try { 
 
 	// -----------------------------------------------------------------------
 	// Load The Settings.php File
