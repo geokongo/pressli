@@ -3,13 +3,13 @@
 	"type" : "project",
 	"description" : "Pressli CMS - A modern, lightweight content management system built on the Rachie PHP framework",
 	"keywords" : ["pressli", "cms", "content management", "rachie", "rackage", "php cms", "blog"],
-	"homepage" : "https://pressli.co.ke",
+	"homepage" : "https://pressli.org",
 	"license" : "MIT",
 	"authors" : [
 		{
 			"name" : "Geoffrey Okongo",
-			"email" : "code@rachie.dev",
-			"homepage" : "https://rachie.dev",
+			"email" : "hello@pressli.org",
+			"homepage" : "https://pressli.org",
 			"role" : "developer"
 		}
 	],
@@ -28,11 +28,11 @@
 	},
 	"scripts" : {
 		"test" : "php phpunit.phar",
-		"test:app" : "php phpunit.phar",
+		"test:pressli" : "php phpunit.phar",
 		"test:rackage" : "php phpunit.phar --configuration vendor/glivers/rackage/phpunit.xml",
 		"test:roline" : "php phpunit.phar --configuration vendor/glivers/roline/phpunit.xml",
 		"test:all" : [
-			"@test:app",
+			"@test:pressli",
 			"@test:rackage",
 			"@test:roline"
 		]
