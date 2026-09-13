@@ -437,9 +437,7 @@ class ToolsController extends AdminController
 
                 // Update CMS version number
                 SettingModel::set('version', $newVersion, true);
-
                 $newPressli->close(); 
-                unlink($newRelease); 
             }
             else {
 
@@ -448,6 +446,7 @@ class ToolsController extends AdminController
                 Redirect::to('admin/tools');
             }                      
 
+            unlink($newRelease); 
             Session::flash('success', 'Pressli updated successfully!');
             Redirect::to('admin/tools');
 
