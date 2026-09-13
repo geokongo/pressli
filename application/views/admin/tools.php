@@ -160,6 +160,9 @@
                 <div class="card-body">
                     <div class="alert alert-info" style="margin-bottom: 1rem; padding: 0.75rem; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
                         <strong>ℹ️ Current Version:</strong> {{ $systemInfo['pressli_version'] }}
+                        @isset($systemInfo['new_version'])
+                            <a href="{{Url::link('admin/tools/update')}}">Click here to update to Pressli v{{$systemInfo['new_version']}}</a>
+                        @endif
                     </div>
 
                     <p style="margin-bottom: 1rem; color: #666;">

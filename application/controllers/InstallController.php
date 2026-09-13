@@ -1,21 +1,5 @@
 <?php namespace Controllers;
 
-use Rackage\Url;
-use Rackage\Path;
-use Rackage\Csrf;
-use Rackage\View;
-use Rackage\Input;
-use Rackage\Model;
-use Rackage\Request;
-use Rackage\Session;
-use Rackage\Redirect;
-use Rackage\Security;
-use Rackage\Registry;
-use Models\RoleModel;
-use Models\UserModel;
-use Rackage\Controller;
-use Models\SettingModel;
-
 /**
  * Installation Controller - Pressli CMS
  *
@@ -49,6 +33,23 @@ use Models\SettingModel;
  * @license http://opensource.org/licenses/MIT MIT License
  * @version 0.0.1
  */
+
+use Rackage\Url;
+use Rackage\Path;
+use Rackage\Csrf;
+use Rackage\View;
+use Rackage\Input;
+use Rackage\Model;
+use Rackage\Request;
+use Rackage\Session;
+use Rackage\Redirect;
+use Rackage\Security;
+use Rackage\Registry;
+use Models\RoleModel;
+use Models\UserModel;
+use Rackage\Controller;
+use Models\SettingModel;
+
 class InstallController extends Controller
 {
     /**
@@ -114,26 +115,20 @@ class InstallController extends Controller
         }
 
         try {
-            $conn = new \mysqli(
-                $config['host'],
-                $config['username'],
-                $config['password'],
-                $config['database'],
-                $config['port'] ?? 3306
-            );
 
-            if ($conn->connect_error) {
-                return false;
-            }
+            $conn = new \mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port'] ?? 3306);
+            if ($conn->connect_error) return false;
 
             $result = $conn->query("SHOW TABLES LIKE 'users'");
             if ($result->num_rows === 0) {
+
                 $conn->close();
                 return false;
             }
 
             $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role_id = 1");
-            $row = $result->fetch_assoc();
+            $row    = $result->fetch_assoc();
+
             $conn->close();
 
             return $row['count'] > 0;
@@ -199,11 +194,9 @@ class InstallController extends Controller
         }
 
         try {
-            $conn = new \mysqli($host, $user, $pass, $name);
 
-            if ($conn->connect_error) {
-                throw new \Exception($conn->connect_error);
-            }
+            $conn = new \mysqli($host, $user, $pass, $name);
+            if ($conn->connect_error) throw new \Exception($conn->connect_error);
 
             $conn->close();
             View::json(['success' => true, 'message' => 'Connection successful! You can proceed to the next step.']);
@@ -227,6 +220,7 @@ class InstallController extends Controller
     public function postDatabase()
     {
         if (!Csrf::verify()) {
+
             Session::flash('error', 'Invalid security token. Please try again.');
             Redirect::back();
         }
@@ -237,12 +231,13 @@ class InstallController extends Controller
         $pass = Input::post('db_pass');
 
         if (empty($host) || empty($name) || empty($user)) {
+
             Session::flash('error', 'Database host, name, and username are required.');
             Redirect::back();
         }
 
-        $configPath = Path::base() . 'config/database.php';
-        $configContent = file_get_contents($configPath);
+        $configPath     = Path::base() . 'config/database.php';
+        $configContent  = file_get_contents($configPath);
 
         $patterns = [
             "'host' => '.*?'" => "'host' => " . var_export($host, true),
@@ -258,7 +253,6 @@ class InstallController extends Controller
         file_put_contents($configPath, $configContent);
 
         Session::set('install_db_configured', true);
-
         Redirect::to('install/setup');
     }
 
@@ -275,6 +269,7 @@ class InstallController extends Controller
     public function getSetup()
     {
         if (!Session::has('install_db_configured')) {
+
             Session::flash('error', 'Please configure database first.');
             Redirect::to('install/database');
         }
@@ -300,52 +295,59 @@ class InstallController extends Controller
     public function postSetup()
     {
         if (!Csrf::verify()) {
+
             Session::flash('error', 'Invalid security token. Please try again.');
             Redirect::back();
         }
 
-        $siteTitle = Input::post('site_title');
-        $siteTagline = Input::post('site_tagline', "Let's build something amazing here");
-        $username = Input::post('username');
-        $email = Input::post('email');
-        $password = Input::post('password');
+        $siteTitle       = Input::post('site_title');
+        $siteTagline     = Input::post('site_tagline', "Let's build something amazing here");
+        $username        = Input::post('username');
+        $email           = Input::post('email');
+        $password        = Input::post('password');
         $passwordConfirm = Input::post('password_confirm');
 
         if (empty($siteTitle) || empty($username) || empty($email) || empty($password)) {
+
             Session::flash('error', 'All required fields must be filled.');
             Redirect::back();
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
             Session::flash('error', 'Invalid email address.');
             Redirect::back();
         }
 
         if ($password !== $passwordConfirm) {
+
             Session::flash('error', 'Passwords do not match.');
             Redirect::back();
         }
 
         if (strlen($password) < 8) {
+
             Session::flash('error', 'Password must be at least 8 characters.');
             Redirect::back();
         }
 
         try {
+
             $this->runMigrations();
 
             $adminRoleId = RoleModel::save(['name' => 'Administrator', 'description' => 'Full system access']);
+            
             RoleModel::save(['name' => 'Editor', 'description' => 'Can publish and manage all posts']);
             RoleModel::save(['name' => 'Author', 'description' => 'Can write and publish own posts']);
             RoleModel::save(['name' => 'Subscriber', 'description' => 'Read-only access']);
 
             UserModel::save([
-                'username' => $username,
-                'email' => $email,
-                'password' => Security::hash($password),
-                'role_id' => $adminRoleId,
-                'status' => 'active',
-                'first_name' => null,
+                'username'  => $username,
+                'email'     => $email,
+                'password'  => Security::hash($password),
+                'role_id'   => $adminRoleId,
+                'status'    => 'active',
+                'first_name'=> null,
                 'last_name' => null
             ]);
 
@@ -354,6 +356,7 @@ class InstallController extends Controller
             SettingModel::set('admin_email', $email, true);
             SettingModel::set('posts_per_page', '10', true);
             SettingModel::set('active_theme', 'aurora', true);
+            SettingModel::set('version', Registry::settings()['version'], true);
 
             // Mark installation as complete in config file
             $this->markInstalled();
@@ -362,8 +365,10 @@ class InstallController extends Controller
             Session::set('install_just_completed', true);
 
             Redirect::to('install/complete');
+            redirect('install/complete');
         }
         catch (\Exception $e) {
+
             Session::flash('error', 'Installation failed: ' . $e->getMessage());
             Redirect::back();
         }
@@ -391,29 +396,26 @@ class InstallController extends Controller
         // Check if database is empty
         $result = Model::sql("SHOW TABLES");
         if ($result->num_rows > 0) {
+
             // Database has existing tables - abort installation
             Session::flash('error', 'Database is not empty. Pressli installation requires a clean database. Please drop all tables or use a different database.');
             Redirect::back();
         }
 
         $migrationsPath = Path::app() . 'database/migrations/';
-        $migrations = glob($migrationsPath . '*.php');
+        $migrations     = glob($migrationsPath . '*.php');
 
-        if (empty($migrations)) {
-            return;
-        }
-
+        if (empty($migrations)) return;
         sort($migrations);
 
         // Disable foreign key checks to allow table creation in any order
         Model::sql("SET FOREIGN_KEY_CHECKS=0");
 
         foreach ($migrations as $migrationFile) {
-            if (basename($migrationFile) === 'migrations.json') {
-                continue;
-            }
-
+            
+            if (basename($migrationFile) === 'migrations.json') continue;
             require_once $migrationFile;
+
             up();
         }
 
@@ -455,7 +457,7 @@ class InstallController extends Controller
     private function markInstalled()
     {
         $configPath = Path::base() . 'config/settings.php';
-        $content = file_get_contents($configPath);
+        $content    = file_get_contents($configPath);
 
         // Replace 'installed' => false with 'installed' => true
         $content = preg_replace(

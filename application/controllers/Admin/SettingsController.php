@@ -7,6 +7,7 @@ use Rackage\Csrf;
 use Models\SettingModel;
 use Models\PostModel;
 use Rackage\Controller;
+
 /**
  * Settings Controller - Pressli CMS
  *
@@ -45,17 +46,17 @@ class SettingsController extends Controller
 
         // Load all published pages for homepage selector
         $pages = PostModel::select(['id', 'title'])
-            ->where('type', 'page')
-            ->where('status', 'published')
-            ->whereNull('deleted_at')
-            ->order('title', 'asc')
-            ->all();
+                    ->where('type', 'page')
+                    ->where('status', 'published')
+                    ->whereNull('deleted_at')
+                    ->order('title', 'asc')
+                    ->all();
 
         // Array of data to send to view
         $data = [
-            'title' => 'Settings',
-            'settings' => $settings,
-            'pages' => $pages,
+            'title'     => 'Settings',
+            'settings'  => $settings,
+            'pages'     => $pages,
         ];
 
         View::render('admin/settings', $data);

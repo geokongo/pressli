@@ -35,7 +35,7 @@ use Rackage\Model;
  */
 class SettingModel extends Model
 {
-    protected static $table = 'settings';
+    protected static $table      = 'settings';
     protected static $timestamps = false;
 
     /**
@@ -87,12 +87,8 @@ class SettingModel extends Model
      */
     public static function getAutoload($autoloadOnly = true)
     {
-        if ($autoloadOnly) {
-            $settings = self::where('autoload', 1)->all();
-        }
-        else {
-            $settings = self::all();
-        }
+        if ($autoloadOnly) $settings = self::where('autoload', 1)->all();
+        else $settings = self::all();
 
         $result = [];
         foreach ($settings as $setting) {
@@ -138,14 +134,15 @@ class SettingModel extends Model
 
         if ($existing) {
             self::where('id', $existing['id'])->save([
-                'value' => $value,
-                'autoload' => $autoload ? 1 : 0
+                'value'     => $value,
+                'autoload'  => $autoload ? 1 : 0
             ]);
-        } else {
+        } 
+        else {
             self::save([
-                'name' => $key,
-                'value' => $value,
-                'autoload' => $autoload ? 1 : 0
+                'name'      => $key,
+                'value'     => $value,
+                'autoload'  => $autoload ? 1 : 0
             ]);
         }
 

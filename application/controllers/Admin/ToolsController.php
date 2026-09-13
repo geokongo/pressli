@@ -37,24 +37,37 @@ class ToolsController extends AdminController
      */
     public function getIndex()
     {
-        // Get current Pressli version
-        $version = $this->settings['version'] ?? '1.0.0';
+        // Check the latest version
+        $manifest   = file_get_contents('https://pressli.org/downloads/manifest.json');
+        $manifest   = json_decode($manifest, true);
+
+        // Ignore if you have the latest version
+        $oldVersion  = $this->settings['version'];
+        $newVersion  = $manifest['latest_version'];
 
         // Get system info
         $systemInfo = [
-            'php_version' => phpversion(),
-            'mysql_version' => $this->getMySQLVersion(),
-            'pressli_version' => $version,
-            'site_url' => $this->settings['site_url'] ?? '',
-            'upload_max_size' => ini_get('upload_max_filesize'),
-            'post_max_size' => ini_get('post_max_size'),
+            'php_version'       => phpversion(),
+            'mysql_version'     => $this->getMySQLVersion(),
+            'pressli_version'   => $oldVersion,
+            'site_url'          => $this->settings['site_url'] ?? '',
+            'upload_max_size'   => ini_get('upload_max_filesize'),
+            'post_max_size'     => ini_get('post_max_size'),
         ];
+
+        // Compare version numbers with PHP native version_compare():
+        //  -1 if the first version is lower
+        //   0 if they are equal
+        //   1 if the second version is lower
+        if (version_compare($newVersion, $oldVersion, '>')) {           
+           $systemInfo['new_version'] = $newVersion;
+        }
 
         // Array of data to send to view
         $data = [
-            'title' => 'Tools',
-            'systemInfo' => $systemInfo,
-            'settings' => $this->settings
+            'title'         => 'Tools',
+            'systemInfo'    => $systemInfo,
+            'settings'      => $this->settings
         ];
 
         View::render('admin/tools', $data);
@@ -316,6 +329,133 @@ class ToolsController extends AdminController
 
         } catch (\Exception $e) {
             View::json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Handle Pressli core update
+     * 
+     * Polls pressli.org for the latest version, and if there's a new version of
+     * Pressli, it downloads and updates the current version.
+     *
+     * @return void
+     */
+    public function getUpdate()
+    {
+        // Check the latest version
+        $manifest   = file_get_contents('https://pressli.org/downloads/manifest.json');
+        $manifest   = json_decode($manifest, true);
+
+        // Ignore if you have the latest version
+        $oldVersion  = $this->settings['version'];
+        $newVersion  = $manifest['latest_version'];
+
+        // Compare version numbers with PHP native version_compare():
+        //  -1 if the first version is lower
+        //   0 if they are equal
+        //   1 if the second version is lower
+        if (!version_compare($newVersion, $oldVersion, '>')) {
+           
+            Session::flash('success', 'Pressli is already on the latest version');
+            Redirect::to('admin/tools');
+        }
+
+        // Download the new version of the Pressli
+        $newRelease  = Path::base("vault/tmp/pressli-$newVersion.zip");
+
+        $handle  = curl_init($manifest['download_url']);
+        $pointer = fopen($newRelease, 'wb+');
+
+        // Set curl opt options
+        curl_setopt($handle, CURLOPT_FILE, $pointer);
+        curl_setopt($handle, CURLOPT_HEADER, 0);
+        curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true); // Crucial: GitHub redirects downloads to AWS S3
+        curl_setopt($handle, CURLOPT_USERAGENT, 'Pressli CMS'); // GitHub API requires a User-Agent header
+        
+        // Ensure downloads only happen over https
+        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, 2);
+        
+        // Download the file
+        curl_exec($handle);
+        
+        // Close both file and curl handles
+        curl_close($handle);
+        fclose($pointer);   
+        
+        // New Release Checksum
+        $newChecksum = hash_file('sha256', $newRelease);
+
+        // Reject if checksum do not match
+        if ($newChecksum !== $manifest['checksum']) {
+            
+            // Delete the bad file immediately
+            unlink($newRelease);
+
+            Session::flash('error', 'CMS Update Failed: Checksum mismatch. The file may be corrupted or malicious.');
+            Redirect::to('admin/tools');            
+        }
+
+        // Proceed to update Pressli
+
+
+        try {
+
+            $newPressli    = new \ZipArchive();
+            if($newPressli->open($newRelease) == true){
+
+                // Loop through each file copying the contents over
+                for($i = 0; $i < $newPressli->numFiles; $i++) {
+
+                    $filePath   = $newPressli->getNameIndex($i);
+                    $newPath    = Path::base($filePath);
+
+                    // Create directory if it doens't exit
+                    if(str_ends_with($filePath, "/")) {
+                        
+                        if(!is_dir($newPath)) {
+                            // Create a writable folder
+                            mkdir($newPath, 0755, true);
+                        }
+
+                        chmod($newPath, 0755);
+                        continue;
+                    }
+
+                    // Skip config
+                    if(str_starts_with($filePath, "config/")) continue;
+
+                    // Parent directory exists before writing file
+                    $dirname    = dirname($newPath);
+                    if(!is_dir($dirname)) {
+                        mkdir($dirname, 0755, true);
+                    }
+
+                    // Extract and copy new file contents
+                    file_put_contents($newPath, $newPressli->getFromIndex($i));                   
+                }
+
+                // Update CMS version number
+                SettingModel::set('version', $newVersion, true);
+
+                $newPressli->close(); 
+                @unlink($newRelease); 
+            }
+            else {
+
+                @unlink($newRelease);
+                Session::flash('error', "Failed to open $newRelease");
+                Redirect::to('admin/tools');
+            }                      
+
+            Session::flash('success', 'Pressli updated successfully!');
+            Redirect::to('admin/tools');
+
+        } 
+        catch (\Throwable $exception) {
+
+            Session::flash('error', 'Update failed: ' . $exception->getMessage());
+            Redirect::to('admin/tools');
         }
     }
 
