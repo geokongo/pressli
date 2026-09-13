@@ -32,8 +32,8 @@
 // SYSTEM BOOTSTRAP - Load required files before proceeding
 // ===========================================================================
 
-try { 
-
+try {
+	
 	// -----------------------------------------------------------------------
 	// Load The Settings.php File
 	// -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ try {
 		// Helps to clean up when switching from production mode to dev mode
 		if(isset($settings['debug']) &&  $settings['debug'] == true) {
 
-			unlink(__DIR__ . '/../vault/config.php');
+			unlink(__DIR__ . '/../vault/cache/config.php');
 			// Reset config for manual loading
 			$config	= [];
 		}
