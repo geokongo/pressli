@@ -423,7 +423,7 @@ class ToolsController extends AdminController
                     }
 
                     // Skip config
-                    if(str_starts_with($filePath, "config/")) continue;
+                    // if(str_starts_with($filePath, "config/")) continue;
 
                     // Parent directory exists before writing file
                     $dirname    = dirname($newPath);
@@ -439,7 +439,7 @@ class ToolsController extends AdminController
                 SettingModel::set('version', $newVersion, true);
 
                 $newPressli->close(); 
-                @unlink($newRelease); 
+                unlink($newRelease); 
             }
             else {
 
