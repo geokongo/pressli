@@ -13,7 +13,7 @@
         window.CSRF = "{{ Csrf::token() }}";
     </script>
     @section('styles')
-    	<link rel="stylesheet" href="{{Url::assets('admin/css/admin.css')}}">
+    	<link rel="stylesheet" href="{{Url::assets('admin/styles/admin.css')}}">
     @endsection
 </head>
 <body> 
@@ -42,8 +42,8 @@
 
 <!-- JS Scripts -->
 @section('scripts')
-    <script src="{{Url::assets('admin/js/admin.js')}}"></script>
-	<script src="{{Url::assets('admin/js/editor.js')}}"></script>
+    <script src="{{Url::assets('admin/scripts/admin.js')}}"></script>
+	<script src="{{Url::assets('admin/scripts/editor.js')}}"></script>
 @endsection
 </body>
 </html>

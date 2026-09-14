@@ -1,11 +1,5 @@
 @extends('admin/layout')
 
-@section('styles')
-    @parent
-    <link rel="stylesheet" href="{{ Url::assets('admin/css/quill.snow.css') }}">
-    <link rel="stylesheet" href="{{ Url::assets('admin/css/quill-custom.css') }}">
-@endsection
-
 @section('content')
 
         <!-- Add New Page Content -->
@@ -164,9 +158,8 @@
             </form>
         </main>
 
-        <script src="{{ Url::assets('admin/js/quill.min.js') }}"></script>
-        <script src="{{ Url::assets('admin/js/media.js') }}"></script>
-        <script src="{{ Url::assets('admin/js/media-picker.js') }}"></script>
+        <script src="{{ Url::assets('admin/scripts/media.js') }}"></script>
+        <script src="{{ Url::assets('admin/scripts/media-picker.js') }}"></script>
         <script>
         // Initialize Quill editor
         var quill = new Quill('#editor-container', {
