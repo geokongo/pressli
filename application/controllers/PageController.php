@@ -411,7 +411,7 @@ class PageController extends Controller
         // Add custom CSS to data
         $data['customCSS'] = $this->customCSS;
 
-        View::render($themeName . '/' . $template, $data);
+        View::render(strtolower($themeName) . '/' . $template, $data);
     }
 
     /**
@@ -474,7 +474,7 @@ class PageController extends Controller
         // Add custom CSS to data
         $data['customCSS'] = $this->customCSS;
 
-        View::render($themeName . '/' . $template, $data);
+        View::render(strtolower($themeName) . '/' . $template, $data);
     }
 
     /**
@@ -567,7 +567,7 @@ class PageController extends Controller
         // Add custom CSS to data
         $data['customCSS'] = $this->customCSS;
 
-        View::render($themeName . '/' . $template, $data);
+        View::render(strtolower($themeName) . '/' . $template, $data);
     }
 
     /**
@@ -664,7 +664,7 @@ class PageController extends Controller
         // Add custom CSS to data
         $data['customCSS'] = $this->customCSS;
 
-        View::render($themeName . '/' . $template, $data);
+        View::render(strtolower($themeName) . '/' . $template, $data);
     }
 
     /**
@@ -701,7 +701,7 @@ class PageController extends Controller
         // Ask the theme for a template matching the content type
         $themeName = $this->themeConfig->getName();
         $template  = $this->themeConfig->getTemplate($type);
-        $template  = $themeName . '/' . str_replace('.php', '', $template);
+        $template  = strtolower($themeName) . '/' . str_replace('.php', '', $template);
 
         View::render($template, $data);
     }
@@ -756,6 +756,6 @@ class PageController extends Controller
         $template = $this->themeConfig->getTemplate('404');
         $template = str_replace('.php', '', $template);
 
-        View::render($themeName . '/' . $template, $data, 404);
+        View::render(strtolower($themeName) . '/' . $template, $data, 404);
     }
 }

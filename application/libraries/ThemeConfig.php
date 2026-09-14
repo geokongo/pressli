@@ -80,7 +80,7 @@ class ThemeConfig
     public function __construct($themeName)
     {
         $this->themeName = $themeName;
-        $this->themePath = realpath(__DIR__ . '/../../public/themes/' . $themeName);
+        $this->themePath = realpath(__DIR__ . '/../../public/themes/' . strtolower($themeName));
 
         if (!$this->themePath) {
             throw new \Exception("Theme directory not found: {$themeName}");

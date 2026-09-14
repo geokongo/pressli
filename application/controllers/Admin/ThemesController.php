@@ -55,14 +55,14 @@ class ThemesController extends AdminController
                 $meta = $config->getMeta();
 
                 $themesData[] = [
-                    'name' => $themeName,
-                    'display_name' => $meta['name'],
-                    'version' => $meta['version'],
-                    'author' => $meta['author'],
-                    'description' => $meta['description'],
-                    'screenshot' => $this->getThemeScreenshot($themeName),
-                    'path' => $config->getPath(),
-                    'is_active' => ($themeName === $activeThemeName),
+                    'name'          => $themeName,
+                    'display_name'  => $meta['name'],
+                    'version'       => $meta['version'],
+                    'author'        => $meta['author'],
+                    'description'   => $meta['description'],
+                    'screenshot'    => $this->getThemeScreenshot($themeName),
+                    'path'          => $config->getPath(),
+                    'is_active'     => ($themeName === $activeThemeName),
                 ];
             } 
             catch (\Exception $e) {
@@ -76,11 +76,8 @@ class ThemesController extends AdminController
         $availableThemes = [];
 
         foreach ($themesData as $theme) {
-            if ($theme['is_active']) {
-                $activeTheme = $theme;
-            } else {
-                $availableThemes[] = $theme;
-            }
+            if ($theme['is_active']) $activeTheme = $theme;
+            else $availableThemes[] = $theme;
         }
 
         // Array of data to send to view
@@ -263,7 +260,7 @@ class ThemesController extends AdminController
      */
     protected function discoverThemes()
     {
-        $themesPath = realpath(__DIR__ . '/../../../themes');
+        $themesPath = realpath(__DIR__ . '/../../../public/themes');
 
         if (!$themesPath || !is_dir($themesPath)) {
             return [];
