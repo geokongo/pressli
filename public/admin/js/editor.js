@@ -1,7 +1,7 @@
 // // Initialize text editor functionality once document is ready
 // document.addEventListener('DOMContentLoaded', () => {
 //     new TextEditor({
-//         uploadUrl: "http://localhost/pressli/admin/media/upload"
+//         uploadUrl: "https://pressli.org/admin/media/upload"
 //     });
 // });
 
