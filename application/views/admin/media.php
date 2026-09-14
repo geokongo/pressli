@@ -47,6 +47,9 @@
                         <a href="{{ Url::link('admin/media?type=audio') }}" class="tab-btn {{ Input::get('type') === 'audio' ? 'active' : '' }}">
                             Audio <span class="tab-count">{{ $typeCounts['audio'] }}</span>
                         </a>
+                        <a href="{{ Url::link('admin/media/trash?type=trash') }}" class="tab-btn {{ Input::get('type') === 'trash' ? 'active' : '' }}">
+                            Empty Trash <span class="tab-count">{{ $typeCounts['trash'] }}</span>
+                        </a>
                     </div>
 
                     <div class="table-actions">

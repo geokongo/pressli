@@ -430,8 +430,6 @@ form.addEventListener('submit', function(e) {
     const formData = new FormData(form);
     formData.append('content', document.querySelector('.text-editor-div').innerHTML);
 
-    alert(document.querySelector('.text-editor-div').innerHTML);
-
     // Send Ajax request
     fetch(form.action, {
         method: 'POST',

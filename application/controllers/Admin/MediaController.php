@@ -47,10 +47,10 @@ class MediaController extends AdminController
 
         // Array of data to send to view
         $data = [
-            'title' => 'Media Library',
-            'media' => $media,
-            'typeCounts' => $typeCounts,
-            'settings' => $this->settings
+            'title'     => 'Media Library',
+            'media'     => $media,
+            'typeCounts'=> $typeCounts,
+            'settings'  => $this->settings
         ];
 
         View::render('admin/media', $data);
@@ -169,6 +169,33 @@ class MediaController extends AdminController
             Redirect::to('admin/media');
         }
         catch (ServiceException $e) {
+            // Media not found
+            Session::flash('error', $e->getMessage());
+            Redirect::to('admin/media');
+        }
+    }
+
+    /**
+     * Permanently deletes all items in the trash.
+     * 
+     * Loops through all media items where 'deleted_at' is NOT null then deletes them from 
+     * the database. Then deletes the actual files from the physical storage.
+     * 
+     * @param null
+     * @return void
+     */
+    public function getTrash() 
+    {
+        try {
+            // Soft delete via service
+            $emptied    = Media::emptyTrash();
+
+            if($emptied['success']) Session::flash('success', $emptied['message']);
+            else Session::flash('error', $emptied['message']);
+
+            Redirect::to('admin/media');
+        }
+        catch (Throwable $e) {
             // Media not found
             Session::flash('error', $e->getMessage());
             Redirect::to('admin/media');

@@ -44,6 +44,7 @@
  */
 
 use Rackage\Date;
+use Rackage\Path;
 use Rackage\Upload;
 use Models\MediaModel;
 use Lib\Exceptions\ServiceException;
@@ -246,11 +247,12 @@ class Media
     public static function getTypeCounts()
     {
         return [
-            'all' => MediaModel::whereNull('deleted_at')->count(),
-            'image' => MediaModel::where('file_type', 'image')->whereNull('deleted_at')->count(),
-            'video' => MediaModel::where('file_type', 'video')->whereNull('deleted_at')->count(),
-            'document' => MediaModel::where('file_type', 'document')->whereNull('deleted_at')->count(),
-            'audio' => MediaModel::where('file_type', 'audio')->whereNull('deleted_at')->count(),
+            'all'       => MediaModel::whereNull('deleted_at')->count(),
+            'image'     => MediaModel::where('file_type', 'image')->whereNull('deleted_at')->count(),
+            'video'     => MediaModel::where('file_type', 'video')->whereNull('deleted_at')->count(),
+            'document'  => MediaModel::where('file_type', 'document')->whereNull('deleted_at')->count(),
+            'audio'     => MediaModel::where('file_type', 'audio')->whereNull('deleted_at')->count(),
+            'trash'     => MediaModel::whereNotNull('deleted_at')->count(),
         ];
     }
 
@@ -295,5 +297,45 @@ class Media
 
         // Default to other for everything else
         return 'other';
+    }
+
+    /**
+     * Deletes all items in the trash.
+     * 
+     * Loops through all items where 'deleted_at' is NOT null, deletes the records from the database
+     * then deletes the physical files form the drive.
+     * 
+     * But should actually delete physical file first before emptying database. This ensures broken
+     * deletion can still proceed later. Otherwise, files become unfindable on the drive.
+     * 
+     * @param null
+     * @return void
+     */
+    public static function emptyTrash()
+    {
+        // Pull all ID's of trash items
+        $trashItems     = MediaModel::select(['id', 'file_path'])->whereNotNull('deleted_at')->all();
+
+        if(count($trashItems) > 0) {
+
+            // Loop through each item deleting the file
+            foreach($trashItems as $item) {
+
+                $filePath   = Path::base("public/{$item['file_path']}");
+                @unlink($filePath);
+            }
+
+            // Bult delete all media entries from the database
+            MediaModel::whereIn('id', array_column($trashItems, 'id'))->delete();
+            return [
+                'success'   => true,
+                'message'   => 'Trash emptied successfully'
+            ];
+
+        }
+        else return [
+            'success'   => false,
+            'message'   => 'No items found in trash'
+        ];
     }
 }
