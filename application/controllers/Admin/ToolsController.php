@@ -458,7 +458,7 @@ class ToolsController extends AdminController
                 Redirect::to('admin/tools');
             }                      
 
-            unlink($newRelease); 
+            @unlink($newRelease); 
             Session::flash('success', 'Pressli updated successfully!');
             Redirect::to('admin/tools');
 
