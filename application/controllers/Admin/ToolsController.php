@@ -397,8 +397,6 @@ class ToolsController extends AdminController
         }
 
         // Proceed to update Pressli
-
-
         try {
 
             $newPressli    = new \ZipArchive();
@@ -410,7 +408,7 @@ class ToolsController extends AdminController
                     $filePath   = $newPressli->getNameIndex($i);
                     $newPath    = Path::base($filePath);
 
-                    // Create directory if it doens't exit
+                    // Create directory if it doesn't exit
                     if(str_ends_with($filePath, "/")) {
                         
                         if(!is_dir($newPath)) {
@@ -432,11 +430,25 @@ class ToolsController extends AdminController
                     }
 
                     // Extract and copy new file contents
-                    file_put_contents($newPath, $newPressli->getFromIndex($i));                   
+                    file_put_contents($newPath, $newPressli->getFromIndex($i));
+                    chmod($newPath, 0644);                   
                 }
 
                 // Update CMS version number
                 SettingModel::set('version', $newVersion, true);
+
+                $overrides  = Path::base('config/overrides/settings.php');
+                if(file_exists($overrides)) {
+                        
+                    $fileContent = file_get_contents($overrides);
+
+                    $pattern     = "/(['\"]version['\"]\s*=>\s*['\"])(.*?)(['\"])/";
+                    $replacement = "\${1}{$newVersion}\${3}";
+                    $fileContent = preg_replace($pattern, $replacement, $fileContent);
+
+                    file_put_contents($overrides, $fileContent);                    
+                }               
+
                 $newPressli->close(); 
             }
             else {
