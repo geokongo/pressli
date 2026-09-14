@@ -267,7 +267,7 @@ document.getElementById('status').addEventListener('change', function() {
 // });
 
 // Load existing content into Quill
-var existingContent = document.getElementById('content-input').value;
+// var existingContent = document.getElementById('content-input').value;
 // if (existingContent) {
 //     quill.root.innerHTML = existingContent;
 // }
@@ -416,8 +416,8 @@ form.addEventListener('submit', function(e) {
 
     // Sync Quill content to hidden textarea
     // const html = quill.root.innerHTML;
-    const html = document.querySelector('.text-editor-div').innerHTML;
-    document.getElementById('content-input').value = html;
+    // const html = document.querySelector('.text-editor-div').innerHTML;
+    // document.getElementById('content-input').value = html;
 
     // Disable buttons and show loading state
     submitButtons.forEach(btn => {
@@ -428,6 +428,9 @@ form.addEventListener('submit', function(e) {
 
     // Prepare form data
     const formData = new FormData(form);
+    formData.append('content', document.querySelector('.text-editor-div').innerHTML);
+
+    alert(document.querySelector('.text-editor-div').innerHTML);
 
     // Send Ajax request
     fetch(form.action, {

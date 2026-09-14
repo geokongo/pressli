@@ -50,6 +50,8 @@
                     <div class="editor-content-wrapper">
                         <!-- <div id="editor-container" style="min-height: 400px;"></div> -->
                         <div class="text-editor-div"></div>
+                        <textarea name="content" id="content-input" style="display: none;"></textarea>
+
                     </div>
 
                     <!-- Excerpt -->
