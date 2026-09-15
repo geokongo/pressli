@@ -1,7 +1,6 @@
 <?php namespace Controllers\Admin;
 
 use Rackage\Url;
-use Rackage\Log;
 use Rackage\Csrf;
 use Rackage\Path;
 use Rackage\View;
@@ -78,10 +77,8 @@ class MediaController extends AdminController
 
         try {
 
-            Log::info("Payload", $_FILES);
             // Upload file via service
             $uploaded = Media::upload('file', Session::get('user_id'));
-
 
             if($uploaded) {
 
