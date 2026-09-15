@@ -114,6 +114,9 @@ class TextEditor {
         this.editor.onfocus = (event) => this.initEditor(event);
         this.editor.onpaste = (event) => this.onPaste(event);
 
+        // Handles different h1, h2, h3 behaviors on keydown
+        this.editor.onkeydown = (event) => this.onKeydown(event);
+
         // Initialize click handler for images
         this.editor.onclick = (event) => {
 
@@ -182,8 +185,10 @@ class TextEditor {
         // Process messy HTML into clear HTML
         if(htmlData) {
 
-            let parser   = new DOMParser();
-            let doc = parser.parseFromString(htmlData, 'text/html');
+            // Clean out <!-- StartFragment --> comments
+            htmlData    = htmlData.replace(/<!--StartFragment-->|<!--EndFragment-->/g, '');
+            let parser  = new DOMParser();
+            let doc     = parser.parseFromString(htmlData, 'text/html');
 
             // Special handling of Google Docs
             let metas;
@@ -309,7 +314,7 @@ class TextEditor {
 
                     // if(!node.hasChildNodes() || node.textContent.trim() === '') node.remove();
                     if(!node.innerHTML.trim()) node.remove();
-                    else node.replaceWith(...node.childNodes);
+                    else node.replaceWith(...node.childNodes);                    
 
                     return;
                 }
@@ -335,12 +340,23 @@ class TextEditor {
         range.deleteContents();
 
         // Create a temporaty fragment to host the new nodes
-        let template    = document.createElement('template');
-        template.innerHTML = textData.trim();
-        let fragment    = template.content;
+        let template        = document.createElement('template');
+        template.innerHTML  = textData.trim();
+        let fragment        = template.content;
 
-        // Insert and update selection anchor/focus
-        range.insertNode(fragment);
+        // Insert new fragment without nesting inside an empty <p> tag
+        let currentBlock = range.startContainer;
+        if(currentBlock.nodeType === Node.TEXT_NODE) {
+            currentBlock    = currentBlock.parentNode;
+        }
+
+        // If cursor is inside a <p>, insert around it
+        if(currentBlock && currentBlock.tagName === 'P' && currentBlock.innerHTML.trim() === '<br>') {
+            currentBlock.replaceWith(fragment);
+        }
+        else range.insertNode(fragment);
+
+        // Update selection anchor/focus
         selection.collapseToEnd();
 
         // Upload pasted base64 images if present
@@ -349,12 +365,198 @@ class TextEditor {
         imagesToUpload.forEach((imgNode, index) => {
 
             // Pull the closest headline to use as image name
-            let imageName  = this.createImageName(imgNode);
-            imageName  = imageName.replace(/[^a-zA-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 50);
+            let imageName   = this.createImageName(imgNode);
+            imageName       = imageName.replace(/[^a-zA-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 50);
 
             // Upload image to server
             this.uploadImage(imgNode, imageName);
         });
+    }
+
+    /**
+     * Handles different h1, h2, h3, h4, h5 on keydowns.
+     * 
+     * Ensures the delete or backspace keys do not inappropriately merge
+     * headings or pulling paragraphs into headings when the text is deleted.
+     */
+    onKeydown(event) {
+
+        // Reject if it's neither a backspace or delete
+        if(event.key !== 'Backspace' && event.key !== 'Delete') return;
+        
+        const selection = window.getSelection();
+        if(!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        let currentBlock    = range.startContainer;
+
+        // Resolve parent tag of the text node
+        if(currentBlock.nodeType === Node.TEXT_NODE) {
+            currentBlock    = currentBlock.parentNode;
+        }
+
+        const isHeading     = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(currentBlock.tagName); 
+        
+        // -------------------------------------------------------------
+        // Handle Backspace
+        // -------------------------------------------------------------
+        if (event.key === 'Backspace') {
+
+            // true means blinking cursor, false means text is highlighted
+            const isCollapsed = range.collapsed; 
+            const textContent = currentBlock.textContent.trim();
+
+            // User highlighted text inside heading and deleted it all
+            if (!isCollapsed && isHeading) {
+
+                // Check if the selection covers the entire text length
+                if (selection.toString().trim() === textContent) {
+
+                    event.preventDefault();
+                    
+                    // Convert container to paragraph immediately
+                    const p     = document.createElement('p');
+                    p.innerHTML = '<br>';
+                    currentBlock.replaceWith(p);
+                    
+                    range.selectNodeContents(p);
+                    range.collapse(true);
+
+                    return;
+                }
+            }
+
+            // Blinking cursor inside an empty heading
+            if (isHeading && (textContent === '' || currentBlock.innerHTML === '<br>')) {
+
+                event.preventDefault();
+
+                const p     = document.createElement('p');
+                p.innerHTML = '<br>';
+                currentBlock.replaceWith(p);
+
+                range.selectNodeContents(p);
+                range.collapse(true);
+
+                return;
+            }
+
+            // Cursor is at the start of a paragraph below a heading
+            if (currentBlock.tagName === 'P' && range.startOffset === 0) {
+
+                const previousBlock = currentBlock.previousElementSibling;
+
+                if (previousBlock && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(previousBlock.tagName)) {
+                    
+                    event.preventDefault();
+
+                    // Delete if the heading is empty
+                    if (previousBlock.textContent.trim() === '') previousBlock.remove();                      
+                    else { // Merge into the heading stripping off styles
+
+                        // Safe text append to avoid styling hijacking
+                        const headingTextLength  = previousBlock.textContent.length;
+                        previousBlock.innerHTML += currentBlock.innerHTML;
+                        currentBlock.remove();
+                        
+                        // Reset cursor precisely at the junction point
+                        const textNode = previousBlock.firstChild;
+                        const newRange = document.createRange();
+
+                        newRange.setStart(textNode, headingTextLength);
+                        newRange.collapse(true);
+
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    }
+                }
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Handle Delete
+        // -------------------------------------------------------------
+        if (event.key === 'Delete') {
+
+            // true means blinking cursor, false means text is highlighted
+            const isCollapsed = range.collapsed; 
+            const textContent = currentBlock.textContent.trim();
+
+            // Delete pressed on an empty heading to pull lower content up
+            if (isHeading && (textContent === '' || currentBlock.innerHTML === '<br>')) {
+
+                const nextBlock = currentBlock.nextElementSibling;
+
+                if (nextBlock) {
+
+                    event.preventDefault();
+
+                    // Turn the current heading block into a clean paragraph container first
+                    const p     = document.createElement('p');
+                    p.innerHTML = nextBlock.innerHTML;
+                    
+                    currentBlock.replaceWith(p);
+                    nextBlock.remove();
+
+                    // Lock cursor to the beginning of the pulled text
+                    range.selectNodeContents(p);
+                    range.collapse(true);
+                }
+            }
+
+            // All text inside heading highlighted for delete
+            if (!isCollapsed && isHeading) {
+
+                // Check if the selection covers the entire text length
+                if (selection.toString().trim() === textContent) {
+
+                    event.preventDefault();
+                    
+                    // Convert container to paragraph immediately
+                    const p     = document.createElement('p');
+                    p.innerHTML = '<br>';
+                    currentBlock.replaceWith(p);
+                    
+                    range.selectNodeContents(p);
+                    range.collapse(true);
+
+                    return;
+                }
+            }
+
+            // Delete pressed at the end of a heading
+            if (isCollapsed && isHeading) {
+
+                // Only split into a paragraph if the cursor is at the very end of the heading text
+                if (range.startOffset === currentBlock.textContent.length) {
+                    
+                    event.preventDefault();
+
+                    const nextBlock = currentBlock.nextElementSibling;
+                    if(!nextBlock) return;
+
+                    // Delete if the heading is empty
+                    if (nextBlock.textContent.trim() === '') nextBlock.remove();                      
+                    else { // Merge into the heading stripping off styles
+
+                        // Safe text append to avoid styling hijacking
+                        const headingTextLength  = currentBlock.textContent.length;
+                        currentBlock.innerHTML += nextBlock.innerHTML;
+                        nextBlock.remove();
+                        
+                        // Reset cursor precisely at the junction point
+                        const textNode = currentBlock.firstChild;
+                        const newRange = document.createRange();
+
+                        newRange.setStart(textNode, headingTextLength);
+                        newRange.collapse(true);
+
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -546,7 +748,8 @@ class TextEditor {
     createImageName(imageNode) {
 
         // Get the main block container
-        let currentNode = imageNode.closest('p, div, li') || imageNode;
+        // let currentNode = imageNode.closest('p, div, li') || imageNode;
+        let currentNode = imageNode;
         let siblings    = [];
         let element     = currentNode.previousSibling;
 
@@ -558,12 +761,12 @@ class TextEditor {
         }
 
         // Score and filter candidates based on priority
-        let bestCandidate= null;
-        let bestPriority = 0;
+        let bestCandidate   = null;
+        let bestPriority    = 0;
 
         for(let node of siblings) {
 
-            let text    = node.textContent ? node.textContent : '';
+            let text    = node.textContent ? node.textContent.trim() : '';
             if(text.length === 0) continue;
 
             let priorityScore   = 0;
@@ -584,6 +787,138 @@ class TextEditor {
                 bestCandidate   = text;
 
                 if(bestPriority === 4) break;
+            }
+        }
+
+        // If there's no title from the top, loop down the image
+        if(!bestCandidate) {
+
+            // Get the main block container
+            siblings    = [];
+            element     = currentNode.nextSibling;
+
+            // Jump one step up if there's no immediately sibling below this node
+            if(!element || !element.textContent.trim()) {
+                element = currentNode.parentNode.nextSibling;
+            }
+
+            // Add all previous siblings together
+            while(element) {
+
+                siblings.push(element);
+                element = element.nextSibling;
+            }
+
+            // Score and filter candidates based on priority
+            let bestPriority    = 0;
+            for(let node of siblings) {
+
+                let text    = node.textContent ? node.textContent.trim() : '';
+                if(text.length === 0) continue;
+
+                let priorityScore   = 0;
+
+                // Element node check
+                if(node.nodeType === node.ELEMENT_NODE) {
+
+                    if(node.matches('h1, h2, h3, h4, h5')) priorityScore = 4;
+                    else if(node.matches('string, b')) priorityScore = 3;
+                    else if(node.matches('p')) priorityScore = 2;
+                }
+                else if(node.nodeType === node.TEXT_NODE) priorityScore = 1;
+
+                // If this is the highest priority so far, keep it
+                if(priorityScore > bestPriority) {
+
+                    bestPriority    = priorityScore;
+                    bestCandidate   = text;
+
+                    if(bestPriority === 4) break;
+                }
+            }
+
+            // ------------------------------------------------------------------
+            // Look one parent up if there's no immediate on this node
+            // ------------------------------------------------------------------
+            if(!bestCandidate) {
+                element = currentNode.parentNode.previousSibling;
+            }
+
+            // Add all previous siblings together
+            while(element) {
+
+                siblings.push(element);
+                element = element.previousSibling;
+            }
+
+            // Score and filter candidates based on priority
+            bestPriority    = 0;
+            for(let node of siblings) {
+
+                let text    = node.textContent ? node.textContent.trim() : '';
+                if(text.length === 0) continue;
+
+                let priorityScore   = 0;
+
+                // Element node check
+                if(node.nodeType === node.ELEMENT_NODE) {
+
+                    if(node.matches('h1, h2, h3, h4, h5')) priorityScore = 4;
+                    else if(node.matches('string, b')) priorityScore = 3;
+                    else if(node.matches('p')) priorityScore = 2;
+                }
+                else if(node.nodeType === node.TEXT_NODE) priorityScore = 1;
+
+                // If this is the highest priority so far, keep it
+                if(priorityScore > bestPriority) {
+
+                    bestPriority    = priorityScore;
+                    bestCandidate   = text;
+
+                    if(bestPriority === 4) break;
+                }
+            }
+
+            // ------------------------------------------------------------------
+            // Look one parent down if there's no immediate on this node
+            // ------------------------------------------------------------------
+            if(!bestCandidate) {
+                element = currentNode.parentNode.nextSibling;
+            }
+
+            // Add all next siblings together
+            while(element) {
+
+                siblings.push(element);
+                element = element.nextSibling;
+            }
+
+            // Score and filter candidates based on priority
+            bestPriority    = 0;
+            for(let node of siblings) {
+
+                let text    = node.textContent ? node.textContent.trim() : '';
+                if(text.length === 0) continue;
+
+                let priorityScore   = 0;
+
+                // Element node check
+                if(node.nodeType === node.ELEMENT_NODE) {
+
+                    if(node.matches('h1, h2, h3, h4, h5')) priorityScore = 4;
+                    else if(node.matches('string, b')) priorityScore = 3;
+                    else if(node.matches('p')) priorityScore = 2;
+                }
+                else if(node.nodeType === node.TEXT_NODE) priorityScore = 1;
+
+                // If this is the highest priority so far, keep it
+                if(priorityScore > bestPriority) {
+
+                    bestPriority    = priorityScore;
+                    bestCandidate   = text;
+
+                    if(bestPriority === 4) break;
+                }
             }
         }
 
