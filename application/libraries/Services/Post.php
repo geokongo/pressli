@@ -207,8 +207,8 @@ class Post
     {
         // Fetch post to delete (must exist and not be deleted)
         $post = PostModel::where('id', $id)
-            ->whereNull('deleted_at')
-            ->first();
+                    ->whereNull('deleted_at')
+                    ->first();
 
         if (!$post) {
             throw new ServiceException('Post not found.');
@@ -220,6 +220,38 @@ class Post
         ]);
 
         return true;
+    }
+
+    /**
+     * Permanently deletes posts - empty trash
+     *
+     * Delete all posts in the database where 'deleted_at' is not null. Meaning they
+     * had been soft deleted - aka moved to trash.
+     *
+     * @param null
+     * @return bool True on successful deletion
+     */
+    public static function emptyTrash()
+    {
+        // Fetch post to delete (must exist and not be deleted)
+        $posts = PostModel::select(['id'])->whereNotNull('deleted_at')->all();
+
+        if (count($posts) < 1) {
+            return [
+                'success'   => false,
+                'message'   => 'No posts found in trash.'
+            ];
+        }
+        else {
+
+            $posts  = array_column($posts, 'id');
+            PostModel::whereIn('id', $posts)->delete();
+
+            return [
+                'success'   => true,
+                'message'   => count($posts) . " permanently deleted from trash."
+            ];
+        }
     }
 
     /**

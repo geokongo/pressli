@@ -54,10 +54,11 @@ class PostsController extends AdminController
 
         // Array of data to send to view
         $data = [
-            'title' => 'Posts',
-            'posts' => $posts,
-            'statusCounts' => $statusCounts,
-            'settings' => $this->settings
+            'title'         => 'Posts',
+            'filter'        => $status,
+            'posts'         => $posts,
+            'statusCounts'  => $statusCounts,
+            'settings'      => $this->settings
         ];
 
         View::render('admin/posts', $data);
@@ -277,5 +278,35 @@ class PostsController extends AdminController
             Session::flash('error', $e->getMessage());
             Redirect::to('admin/posts');
         }
+    }
+
+    /**
+     * Delete all posts currently in trash.
+     * 
+     * Loops through all posts recently deleted but still in trash 'deleted_at' and
+     * permanently deletes them from the database. This makes them irreversible.
+     * 
+     * @param null
+     * @return void
+     */
+    public function trash()
+    {
+
+        try {
+
+            // Call service to permantently delete items
+            $deleted    = Post::emptyTrash();
+
+            // Success - redirect to list
+            Session::flash($deleted['success'] ? 'success' : 'error', $deleted['message']);
+            Redirect::to('admin/posts?status=trash');
+        }
+        catch (\Throwable $exception) {
+
+            // Post not found
+            Session::flash('error', $exception->getMessage());
+            Redirect::to('admin/posts');
+        }
+
     }
 }

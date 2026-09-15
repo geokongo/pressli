@@ -55,6 +55,9 @@
                                 <option value="delete">Delete Permanently</option>
                             </select>
                             <button class="btn btn-secondary" disabled id="applyBulk">Apply</button>
+                            @if($filter == 'trash')
+                            <a href="{{ Url::link('admin/posts/trash') }}" class="btn btn-danger">Empty Trash</a>
+                            @endif
                         </div>
 
                         <div class="search-box">
